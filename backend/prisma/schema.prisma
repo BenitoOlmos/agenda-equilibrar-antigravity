@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  role          String    @default("CLIENT") // Was ENUM: ADMIN, COORDINATOR, SPECIALIST, CLIENT
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+
+  // Relations depending on role
+  appointmentsAsClient      Appointment[] @relation("ClientAppointments")
+  appointmentsAsSpecialist  Appointment[] @relation("SpecialistAppointments")
+  payments                  Payment[]
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  firstName   String
+  lastName    String
+  phone       String?
+  documentId  String?  // RUT / ID number
+  address     String?
+  city        String?
+  
+  // For clients (Insurance)
+  healthSystem String?            // e.g. FONASA, ISAPRE Banmédica, Consorcio
+  complementaryInsurance String?  // Optional add-on insurance provider
+  
+  // For specialists
+  specialty   String?
+  bio         String?
+  color       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  duration    Int      // Duration in minutes
+  price       Float
+  isActive    Boolean  @default(true)
+  
+  appointments Appointment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  programs    ProgramService[]
+}
+
+model Program {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  isActive    Boolean  @default(true)
+  
+  services    ProgramService[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProgramService {
+  programId String
+  serviceId String
+  count     Int     @default(1)
+  
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  @@id([programId, serviceId])
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  clientId        String
+  client          User              @relation("ClientAppointments", fields: [clientId], references: [id])
+  specialistId    String
+  specialist      User              @relation("SpecialistAppointments", fields: [specialistId], references: [id])
+  serviceId       String
+  service         Service           @relation(fields: [serviceId], references: [id])
+
+  date            DateTime
+  sessionType     String            @default("IN_PERSON") // Was ENUM: ONLINE, IN_PERSON
+  meetLink        String?
+  status          String            @default("SCHEDULED") // Was ENUM: SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
+  notes           String?
+
+  payment         Payment?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model Payment {
+  id            String       @id @default(uuid())
+  amount        Float
+  status        String       // Ej: PENDING, COMPLETED, REFUNDED
+  paymentMethod String?      // Ej: CASH, TRANSFER, DEBIT, CREDIT, GATEWAY
+  appointmentId String?      @unique
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
