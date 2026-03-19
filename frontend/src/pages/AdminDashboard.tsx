@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { 
-  Users, Calendar as CalendarIcon, LayoutDashboard, Settings, LogOut, DollarSign, 
-  CheckCircle2, Stethoscope, Mail, Database, Search, ChevronLeft, ChevronRight, 
-  Clock, Menu, ChevronDown, Globe, Home, Grid, List, UserPlus, Filter, Bell, 
-  MoreVertical, ChevronLast, Plus, Smartphone, Monitor, CreditCard, MessageSquare, Info
+  Users, Calendar as CalendarIcon, LogOut, DollarSign, 
+  CheckCircle2, Mail, Database, Search, ChevronLeft, ChevronRight, 
+  Clock, ChevronDown, List, UserPlus, Filter, 
+  MoreVertical, ChevronLast, Plus, Smartphone, Monitor
 } from 'lucide-react';
 
 const LOGO_URL = 'https://www.clinicaequilibrar.cl/assets/logo-CYF-QZPl.png';
@@ -42,7 +42,6 @@ const CalendarWidget = ({ month, year, selectedDay, onDaySelect }: any) => (
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('agenda');
   const [isMobileMode, setIsMobileMode] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
@@ -93,7 +92,6 @@ const AdminDashboard = () => {
   const [agendaFilterSpec, setAgendaFilterSpec] = useState('ALL');
 
   useEffect(() => {
-    setMounted(true);
     fetchDashboardData();
   }, []);
 
