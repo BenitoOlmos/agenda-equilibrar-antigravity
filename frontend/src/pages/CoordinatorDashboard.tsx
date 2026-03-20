@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { 
   Users, Calendar as CalendarIcon, LogOut, DollarSign, 
-  CheckCircle2, Mail, Database, Search, ChevronLeft, ChevronRight, 
+  CheckCircle2, Mail, Search, ChevronLeft, ChevronRight, 
   Clock, ChevronDown, List, UserPlus, Filter, 
-  MoreVertical, ChevronLast, Plus, Smartphone, Monitor
+  MoreVertical, ChevronLast, Plus, Monitor, Smartphone
 } from 'lucide-react';
 
 const LOGO_URL = 'https://www.clinicaequilibrar.cl/assets/logo-CYF-QZPl.png';
@@ -52,7 +52,6 @@ const CoordinatorDashboard = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [programs, setPrograms] = useState<any[]>([]);
-  const [dbTab, setDbTab] = useState('Users');
   const [loading, setLoading] = useState(true);
 
   // Search & Filter States
@@ -300,9 +299,7 @@ const CoordinatorDashboard = () => {
               { id: 'agenda', label: 'Agenda' },
               { id: 'services', label: 'Servicios' },
               { id: 'users', label: 'Usuarios' },
-              { id: 'payments', label: 'Pagos' },
-              { id: 'database', label: 'DB Raw' },
-              { id: 'settings', label: 'Ajustes' },
+              { id: 'payments', label: 'Pagos' }
             ].map(item => (
               <button 
                 key={item.id} 
@@ -319,10 +316,6 @@ const CoordinatorDashboard = () => {
           </nav>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="p-2 hover:bg-slate-700 rounded-lg text-slate-300" title="Ver Móvil" onClick={() => setIsMobileMode(true)}>
-             <Smartphone className="w-4 h-4" />
-          </button>
-          <button className="p-2 hover:bg-slate-700 rounded-lg text-slate-300"><Search className="w-4 h-4" /></button>
           <button onClick={() => window.location.href='/login'} className="p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors"><LogOut className="w-4 h-4" /></button>
           <div className="w-8 h-8 bg-gradient-to-tr from-[#00A89C] to-emerald-400 rounded-full flex flex-col items-center justify-center text-[11px] font-bold border-2 border-slate-700 shadow-sm leading-none">PS</div>
         </div>
@@ -783,45 +776,7 @@ const CoordinatorDashboard = () => {
                   </div>
                )}
 
-               {activeTab === 'database' && (
-                  <div className="flex flex-col h-full bg-slate-900 rounded-2xl shadow-2xl overflow-hidden animate-fade-in max-w-7xl mx-auto w-full border border-slate-700">
-                    <div className="flex items-center justify-between p-4 bg-slate-800 border-b border-slate-700/50">
-                      <div className="flex items-center space-x-3 text-slate-300">
-                        <Database className="w-5 h-5 text-indigo-400" />
-                        <h3 className="font-mono font-bold text-sm tracking-wide">RAW_DATABASE_INSPECTOR</h3>
-                      </div>
-                      <div className="flex space-x-1 bg-slate-900 p-1 rounded-lg">
-                        {['Users', 'Services', 'Appointments', 'Payments'].map(t => (
-                          <button key={t} onClick={() => setDbTab(t)} className={`px-4 py-1.5 text-xs font-mono font-bold rounded-md transition-colors ${dbTab === t ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-500 hover:text-slate-300'}`}>{t}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex-1 overflow-auto p-2">
-                        <table className="w-full text-left border-collapse text-xs whitespace-nowrap font-mono">
-                          <thead className="text-slate-500 bg-slate-900/50">
-                            {dbTab === 'Users' && <tr><th className="p-3">ID</th><th className="p-3">Role</th><th className="p-3">Email</th><th className="p-3">Profile</th><th className="p-3">RUT</th></tr>}
-                            {dbTab === 'Services' && <tr><th className="p-3">ID</th><th className="p-3">Name</th><th className="p-3">Price</th><th className="p-3">Duration</th></tr>}
-                            {dbTab === 'Appointments' && <tr><th className="p-3">ID</th><th className="p-3">Date</th><th className="p-3">Type</th><th className="p-3">Status</th></tr>}
-                            {dbTab === 'Payments' && <tr><th className="p-3">ID</th><th className="p-3">Amount</th><th className="p-3">Status</th></tr>}
-                          </thead>
-                          <tbody className="text-slate-300">
-                            {dbTab === 'Users' && users.map((u, i) => (
-                              <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{u.id}</td><td className="p-3 text-indigo-400">{u.role}</td><td className="p-3">{u.email}</td><td className="p-3">{u.profile?.firstName} {u.profile?.lastName}</td><td className="p-3 text-slate-500">{u.profile?.documentId}</td></tr>
-                            ))}
-                            {dbTab === 'Services' && services.map((s, i) => (
-                              <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{s.id}</td><td className="p-3 text-emerald-400">{s.name}</td><td className="p-3">${s.price}</td><td className="p-3">{s.duration}m</td></tr>
-                            ))}
-                            {dbTab === 'Appointments' && appointments.map((a, i) => (
-                              <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{a.id}</td><td className="p-3 text-sky-400">{new Date(a.date).toLocaleString()}</td><td className="p-3">{a.sessionType}</td><td className="p-3">{a.status}</td></tr>
-                            ))}
-                            {dbTab === 'Payments' && payments.map((p, i) => (
-                              <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{p.id}</td><td className="p-3 text-emerald-400">${p.amount}</td><td className="p-3">{p.status}</td></tr>
-                            ))}
-                          </tbody>
-                        </table>
-                    </div>
-                  </div>
-               )}
+               {/* Database view removed for Coordinator profile */}
             </>
           )}
         </main>
