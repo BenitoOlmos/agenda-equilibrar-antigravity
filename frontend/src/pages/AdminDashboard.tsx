@@ -145,18 +145,35 @@ const AdminDashboard = () => {
     e.preventDefault();
     const url = isEditingUser ? `/api/data/users/${newUser.id}` : '/api/data/users';
     const method = isEditingUser ? 'PUT' : 'POST';
-    await fetch(url, { 
-        method, headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ ...newUser, documentId: newUser.rut, specialty: 'General' }) 
-    });
-    setShowUserModal(false);
-    fetchDashboardData();
+    try {
+      const res = await fetch(url, { 
+          method, headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ ...newUser, documentId: newUser.rut, specialty: 'General' }) 
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        alert(`Error: No se pudo guardar. ${errData.error || ''}`);
+        return;
+      }
+      setShowUserModal(false);
+      fetchDashboardData();
+    } catch (error) {
+      alert('Error de conexión fallida al servidor.');
+    }
   };
 
   const handleDeleteUser = async (id: string) => {
     if(!window.confirm('¿Seguro que deseas eliminar a este usuario permanentemente?')) return;
-    await fetch(`/api/data/users/${id}`, { method: 'DELETE' });
-    fetchDashboardData();
+    try {
+      const res = await fetch(`/api/data/users/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        alert('Error al intentar borrar el usuario.');
+        return;
+      }
+      fetchDashboardData();
+    } catch (e) {
+      alert('Error de conexión fallida al servidor.');
+    }
   };
 
   const handleCreateAppt = async (e: any) => {
