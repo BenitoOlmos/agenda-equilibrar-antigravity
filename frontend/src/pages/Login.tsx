@@ -22,22 +22,29 @@ const Login = () => {
     setError('');
 
     try {
-      setTimeout(() => {
-        if (email === 'admin@equilibrar.cl') {
-          navigate('/admin');
-        } else if (email === 'coord@equilibrar.cl') {
-          navigate('/coordinator');
-        } else if (email === 'mariapaz@equilibrar.cl' || email === 'fernando@equilibrar.cl') {
-          navigate('/specialist');
-        } else if (email.includes('cliente')) {
-          navigate('/client');
-        } else {
-          setError('Credenciales inválidas');
-        }
-        setLoading(false);
-      }, 1000);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.token) {
+        // Store JWT token if needed: localStorage.setItem('token', data.token);
+        const { role } = data.user;
+        if (role === 'ADMIN') navigate('/admin');
+        else if (role === 'COORDINATOR') navigate('/coordinator');
+        else if (role === 'SPECIALIST') navigate('/specialist');
+        else navigate('/client');
+      } else {
+        setError(data.error || 'Credenciales inválidas');
+      }
     } catch (err) {
       setError('Error al conectar con el servidor');
+    } finally {
       setLoading(false);
     }
   };
