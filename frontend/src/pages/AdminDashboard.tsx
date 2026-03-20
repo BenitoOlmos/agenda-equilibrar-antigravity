@@ -91,7 +91,7 @@ const AdminDashboard = () => {
     'bg-[#ffccbc] border-[#ff5722] text-[#bf360c]',
     'bg-[#e1bee7] border-[#ba68c8] text-[#4a148c]',
   ];
-  const [newUser, setNewUser] = useState<any>({ firstName: '', lastName: '', email: '', role: 'CLIENT', password: '', phone: '', address: '', rut: '', color: PRESET_COLORS[0], healthSystem: '', complementaryInsurance: '' });
+  const [newUser, setNewUser] = useState<any>({ firstName: '', lastName: '', email: '', role: 'CLIENT', password: '', phone: '', address: '', rut: '', color: PRESET_COLORS[0], healthSystem: '', complementaryInsurance: '', commune: '', emergencyPhone: '', emergencyContactName: '', birthDate: '', observations: '', medicalRecordLink: '' });
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [newAppt, setNewAppt] = useState<any>({ clientId: '', specialistId: '', serviceId: '', date: '', sessionType: 'IN_PERSON', status: 'SCHEDULED' });
   const [isEditingAppt, setIsEditingAppt] = useState(false);
@@ -768,7 +768,7 @@ const AdminDashboard = () => {
                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                            <input type="text" placeholder="Buscar por nombre, RUT, correo..." className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-[#00A89C] w-full md:w-64 shadow-sm" value={searchUser} onChange={(e) => setSearchUser(e.target.value)} />
                         </div>
-                        <button onClick={() => { setIsEditingUser(false); setNewUser({firstName: '', lastName: '', email: '', role: 'CLIENT', password: '', phone: '', address: '', rut: '', color: '#00A89C', healthSystem: '', complementaryInsurance: ''}); setShowUserModal(true); }} className="bg-[#7AC943] hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-colors shadow-green-500/20 whitespace-nowrap shrink-0 w-full md:w-auto">
+                        <button onClick={() => { setIsEditingUser(false); setNewUser({firstName: '', lastName: '', email: '', role: 'CLIENT', password: '', phone: '', address: '', rut: '', color: '#00A89C', healthSystem: '', complementaryInsurance: '', commune: '', emergencyPhone: '', emergencyContactName: '', birthDate: '', observations: '', medicalRecordLink: ''}); setShowUserModal(true); }} className="bg-[#7AC943] hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-colors shadow-green-500/20 whitespace-nowrap shrink-0 w-full md:w-auto">
                           + Registrar Perfil
                         </button>
                       </div>
@@ -807,7 +807,7 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td className="p-5 text-right space-x-2">
-                              <button onClick={() => { setIsEditingUser(true); setNewUser({id: user.id, email: user.email, role: user.role, firstName: user.profile?.firstName||'', lastName: user.profile?.lastName||'', rut: user.profile?.documentId||'', phone: user.profile?.phone||'', address: user.profile?.address||'', color: user.profile?.color || '#00A89C', healthSystem: user.profile?.healthSystem || '', complementaryInsurance: user.profile?.complementaryInsurance || ''}); setShowUserModal(true); }} className="text-[#00A89C] hover:bg-[#00A89C]/20 font-bold text-xs bg-[#00A89C]/10 px-3 py-1.5 rounded-md transition-colors">Editar</button>
+                              <button onClick={() => { setIsEditingUser(true); setNewUser({id: user.id, email: user.email, role: user.role, firstName: user.profile?.firstName||'', lastName: user.profile?.lastName||'', rut: user.profile?.documentId||'', phone: user.profile?.phone||'', address: user.profile?.address||'', color: user.profile?.color || '#00A89C', healthSystem: user.profile?.healthSystem || '', complementaryInsurance: user.profile?.complementaryInsurance || '', commune: user.profile?.commune || '', emergencyPhone: user.profile?.emergencyPhone || '', emergencyContactName: user.profile?.emergencyContactName || '', birthDate: user.profile?.birthDate || '', observations: user.profile?.observations || '', medicalRecordLink: user.profile?.medicalRecordLink || ''}); setShowUserModal(true); }} className="text-[#00A89C] hover:bg-[#00A89C]/20 font-bold text-xs bg-[#00A89C]/10 px-3 py-1.5 rounded-md transition-colors">Editar</button>
                               <button onClick={() => handleDeleteUser(user.id)} className="text-red-500 hover:bg-red-100 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-md transition-colors">Borrar</button>
                             </td>
                           </tr>
@@ -1087,6 +1087,23 @@ const AdminDashboard = () => {
                      </select>
                    </div>
                    <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Seguro Complementario</label><input type="text" placeholder="Ej: MetLife, BICE, Falabella..." className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newUser.complementaryInsurance || ''} onChange={(e) => setNewUser({...newUser, complementaryInsurance: e.target.value})} /></div>
+                   
+                   <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Dirección (Calle/Número)</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newUser.address || ''} onChange={(e) => setNewUser({...newUser, address: e.target.value})} /></div>
+                   <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Comuna / Sector</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newUser.commune || ''} onChange={(e) => setNewUser({...newUser, commune: e.target.value})} /></div>
+                   <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Fecha de Nacimiento</label><input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newUser.birthDate || ''} onChange={(e) => setNewUser({...newUser, birthDate: e.target.value})} /></div>
+                   <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Link a Ficha Clínica (URL)</label><input type="url" placeholder="https://..." className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newUser.medicalRecordLink || ''} onChange={(e) => setNewUser({...newUser, medicalRecordLink: e.target.value})} /></div>
+                   
+                   <div className="col-span-2 border-t border-slate-100 pt-4 mt-2">
+                     <p className="text-xs font-bold text-orange-500 uppercase mb-3">▶ Contacto de Emergencia (SOS)</p>
+                     <div className="grid grid-cols-2 gap-4">
+                       <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Referencia SOS (Nombre)</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-orange-500" value={newUser.emergencyContactName || ''} onChange={(e) => setNewUser({...newUser, emergencyContactName: e.target.value})} /></div>
+                       <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Teléfono SOS</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-orange-500" value={newUser.emergencyPhone || ''} onChange={(e) => setNewUser({...newUser, emergencyPhone: e.target.value})} /></div>
+                     </div>
+                   </div>
+
+                   <div className="col-span-2"><label className="text-xs font-bold text-slate-500 uppercase">Observaciones Clínicas Generales</label>
+                     <textarea rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newUser.observations || ''} onChange={(e) => setNewUser({...newUser, observations: e.target.value})}></textarea>
+                   </div>
                  </>
               )}
               

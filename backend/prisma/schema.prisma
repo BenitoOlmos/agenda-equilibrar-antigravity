@@ -40,6 +40,14 @@ model Profile {
   healthSystem String?            // e.g. FONASA, ISAPRE Banmédica, Consorcio
   complementaryInsurance String?  // Optional add-on insurance provider
   
+  // For clients (Ficha Clinica Extensa)
+  commune                 String?
+  birthDate               String?
+  emergencyPhone          String?
+  emergencyContactName    String?
+  observations            String?
+  medicalRecordLink       String?
+  
   // For specialists
   specialty   String?
   bio         String?

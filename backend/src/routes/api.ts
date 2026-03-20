@@ -76,13 +76,13 @@ router.get('/services', async (req, res) => {
 // POST to create user (Profile creation)
 router.post('/users', express.json(), async (req, res) => {
   try {
-    const { email, password, role, firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance } = req.body;
+    const { email, password, role, firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance, commune, birthDate, emergencyPhone, emergencyContactName, observations, medicalRecordLink } = req.body;
     const hash = await bcrypt.hash(password || '123456', 10);
     const user = await prisma.user.create({
       data: {
         email, role, passwordHash: hash,
         profile: {
-          create: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance }
+          create: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance, commune, birthDate, emergencyPhone, emergencyContactName, observations, medicalRecordLink }
         }
       },
       include: { profile: true }
@@ -95,15 +95,15 @@ router.post('/users', express.json(), async (req, res) => {
 router.put('/users/:id', express.json(), async (req, res) => {
   try {
     const { id } = req.params;
-    const { email, role, firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance } = req.body;
+    const { email, role, firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance, commune, birthDate, emergencyPhone, emergencyContactName, observations, medicalRecordLink } = req.body;
     const user = await prisma.user.update({
       where: { id },
       data: {
         email, role,
         profile: {
           upsert: {
-            create: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance },
-            update: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance }
+            create: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance, commune, birthDate, emergencyPhone, emergencyContactName, observations, medicalRecordLink },
+            update: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance, commune, birthDate, emergencyPhone, emergencyContactName, observations, medicalRecordLink }
           }
         }
       },
