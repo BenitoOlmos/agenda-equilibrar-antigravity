@@ -580,7 +580,6 @@ const CoordinatorDashboard = () => {
                               <td className="p-5 font-extrabold text-[#00A89C]">${svc.price.toLocaleString()}</td>
                               <td className="p-5 text-right space-x-2">
                                  <button onClick={() => { setIsEditingService(true); setNewSvc(svc); setShowServiceModal(true); }} className="text-[#00A89C] hover:text-emerald-700 font-bold text-xs bg-[#00A89C]/10 px-3 py-1.5 rounded-md">Editar</button>
-                                 <button className="text-red-500 hover:text-red-600 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-md">Eliminar</button>
                               </td>
                            </tr>
                            ))}

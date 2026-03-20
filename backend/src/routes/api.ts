@@ -134,13 +134,8 @@ router.put('/services/:id', express.json(), async (req, res) => {
   } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to update service'}); }
 });
 
-// DELETE to remove service
-router.delete('/services/:id', async (req, res) => {
-  try {
-    await prisma.service.delete({ where: { id: req.params.id } });
-    res.json({ success: true });
-  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to delete service'}); }
-});
+// DELETE to remove service (Temporarily disabled due to clinical policy)
+// router.delete('/services/:id', ...
 
 // DELETE to remove user
 router.delete('/users/:id', async (req, res) => {
