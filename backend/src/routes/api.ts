@@ -235,12 +235,12 @@ router.delete('/programs/:id', async (req, res) => {
 });
 // ==================== DATABASE BACKUP ====================
 router.get('/backup/export', (req, res) => {
-  const dbPath = path.join(__dirname, '../../../prisma/dev.db');
+  const dbPath = path.join(__dirname, '../../prisma/dev.db');
   res.download(dbPath, 'agenda_equilibrar_backup.db');
 });
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../../prisma')),
+  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../prisma')),
   filename: (req, file, cb) => cb(null, 'dev.db')
 });
 const upload = multer({ storage });
