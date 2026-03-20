@@ -8,6 +8,13 @@ import {
 
 const LOGO_URL = 'https://www.clinicaequilibrar.cl/assets/logo-CYF-QZPl.png';
 
+const roleMap: Record<string, string> = {
+  ADMIN: 'ADMINISTRADOR',
+  SPECIALIST: 'ESPECIALISTA',
+  COORDINATOR: 'COORDINADOR',
+  CLIENT: 'PACIENTE'
+};
+
 const hours = Array.from({ length: 13 }, (_, i) => i + 8); // 08:00 to 20:00
 
 const CalendarWidget = ({ month, year, selectedDay, onDaySelect }: any) => (
@@ -684,7 +691,7 @@ const CoordinatorDashboard = () => {
                                 user.role === 'SPECIALIST' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
                                 'bg-green-50 text-green-600 border border-green-100'
                               }`}>
-                                {user.role}
+                                {roleMap[user.role] || user.role}
                               </span>
                             </td>
                             <td className="p-5 text-right space-x-2">

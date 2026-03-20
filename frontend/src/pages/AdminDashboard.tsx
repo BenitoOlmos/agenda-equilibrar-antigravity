@@ -8,6 +8,13 @@ import {
 
 const LOGO_URL = 'https://www.clinicaequilibrar.cl/assets/logo-CYF-QZPl.png';
 
+const roleMap: Record<string, string> = {
+  ADMIN: 'ADMINISTRADOR',
+  SPECIALIST: 'ESPECIALISTA',
+  COORDINATOR: 'COORDINADOR',
+  CLIENT: 'PACIENTE'
+};
+
 const hours = Array.from({ length: 13 }, (_, i) => i + 8); // 08:00 to 20:00
 
 const CalendarWidget = ({ month, year, selectedDay, onDaySelect }: any) => (
@@ -705,7 +712,7 @@ const AdminDashboard = () => {
                                 user.role === 'SPECIALIST' ? 'bg-purple-50 text-purple-600 border border-purple-100' :
                                 'bg-green-50 text-green-600 border border-green-100'
                               }`}>
-                                {user.role}
+                                {roleMap[user.role] || user.role}
                               </span>
                             </td>
                             <td className="p-5 text-right space-x-2">
@@ -820,7 +827,7 @@ const AdminDashboard = () => {
                           </thead>
                           <tbody className="text-slate-300">
                             {dbTab === 'Users' && users.map((u, i) => (
-                              <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{u.id}</td><td className="p-3 text-indigo-400">{u.role}</td><td className="p-3">{u.email}</td><td className="p-3">{u.profile?.firstName} {u.profile?.lastName}</td><td className="p-3 text-slate-500">{u.profile?.documentId}</td></tr>
+                              <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{u.id}</td><td className="p-3 text-indigo-400">{roleMap[u.role] || u.role}</td><td className="p-3">{u.email}</td><td className="p-3">{u.profile?.firstName} {u.profile?.lastName}</td><td className="p-3 text-slate-500">{u.profile?.documentId}</td></tr>
                             ))}
                             {dbTab === 'Services' && services.map((s, i) => (
                               <tr key={i} className="border-b border-slate-800 hover:bg-slate-800/50"><td className="p-3 text-slate-600">{s.id}</td><td className="p-3 text-emerald-400">{s.name}</td><td className="p-3">${s.price}</td><td className="p-3">{s.duration}m</td></tr>
