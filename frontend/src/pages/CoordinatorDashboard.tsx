@@ -162,20 +162,6 @@ const CoordinatorDashboard = () => {
     }
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if(!window.confirm('¿Seguro que deseas eliminar a este usuario permanentemente?')) return;
-    try {
-      const res = await fetch(`/api/data/users/${id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        alert('Error al intentar borrar el usuario.');
-        return;
-      }
-      fetchDashboardData();
-    } catch (e) {
-      alert('Error de conexión fallida al servidor.');
-    }
-  };
-
   const handleCreateAppt = async (e: any) => {
     e.preventDefault();
     await fetch('/api/data/appointments', { 
