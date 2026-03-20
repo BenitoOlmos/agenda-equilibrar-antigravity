@@ -93,7 +93,8 @@ const AdminDashboard = () => {
   ];
   const [newUser, setNewUser] = useState<any>({ firstName: '', lastName: '', email: '', role: 'CLIENT', password: '', phone: '', address: '', rut: '', color: PRESET_COLORS[0], healthSystem: '', complementaryInsurance: '' });
   const [isEditingUser, setIsEditingUser] = useState(false);
-  const [newAppt, setNewAppt] = useState({ clientId: '', specialistId: '', serviceId: '', date: '', sessionType: 'IN_PERSON' });
+  const [newAppt, setNewAppt] = useState<any>({ clientId: '', specialistId: '', serviceId: '', date: '', sessionType: 'IN_PERSON', status: 'SCHEDULED' });
+  const [isEditingAppt, setIsEditingAppt] = useState(false);
 
   // Filter Agenda State
   const [agendaFilterSpec, setAgendaFilterSpec] = useState('ALL');
@@ -224,14 +225,31 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleCreateAppt = async (e: any) => {
+  const handleSaveAppt = async (e: any) => {
     e.preventDefault();
-    await fetch('/api/data/appointments', { 
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ ...newAppt, status: 'SCHEDULED' }) 
-    });
+    if (isEditingAppt) {
+      await fetch(`/api/data/appointments/${newAppt.id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAppt)
+      });
+    } else {
+      await fetch('/api/data/appointments', { 
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ ...newAppt, status: 'SCHEDULED' }) 
+      });
+    }
     setShowApptModal(false);
     fetchDashboardData();
+  };
+
+  const handleDeleteAppt = async (id: string) => {
+    if(!window.confirm('¿Seguro que deseas anular y eliminar esta cita permanentemente? Esto limpiará su registro de pagos asociado.')) return;
+    try {
+      const res = await fetch(`/api/data/appointments/${id}`, { method: 'DELETE' });
+      if (!res.ok) { const errData = await res.json(); alert(`Error: ${errData.error}`); return; }
+      setShowApptModal(false);
+      fetchDashboardData();
+    } catch (error) { alert('Error de conexión.'); }
   };
 
   const professionals = users
@@ -431,7 +449,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <button onClick={() => setShowApptModal(true)} className="w-full py-2.5 px-3 bg-[#00A89C] hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center justify-center transition-all shadow-md shadow-[#00A89C]/20">
+              <button onClick={() => { setIsEditingAppt(false); setNewAppt({ clientId: '', specialistId: '', serviceId: '', date: '', sessionType: 'IN_PERSON', status: 'SCHEDULED' }); setShowApptModal(true); }} className="w-full py-2.5 px-3 bg-[#00A89C] hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center justify-center transition-all shadow-md shadow-[#00A89C]/20">
                 <Plus className="w-4 h-4 mr-2" />
                 Asignar Nueva Hora
               </button>
@@ -521,6 +539,18 @@ const AdminDashboard = () => {
                                                   key={`${app.id}-${i}`}
                                                   className={`absolute inset-x-2 rounded-xl border-l-[6px] p-3 shadow-sm z-20 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all flex flex-col ${app.color}`}
                                                   style={{ top: `${(app.startHour - 8) * 80 + 5}px`, height: `${app.duration * 80 - 10}px` }}
+                                                  onClick={() => {
+                                                     if(app.id.toString().startsWith('d')) return; // Ignore blocks
+                                                     const rawAppt = appointments.find(a => a.id === app.id);
+                                                     if(!rawAppt) return;
+                                                     // Remove timezone offset for proper datetime-local display
+                                                     const d = new Date(rawAppt.date);
+                                                     const tzOffset = d.getTimezoneOffset() * 60000;
+                                                     const formattedDate = new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+                                                     setNewAppt({ id: rawAppt.id, clientId: rawAppt.clientId, specialistId: rawAppt.specialistId, serviceId: rawAppt.serviceId, date: formattedDate, sessionType: rawAppt.sessionType, status: rawAppt.status, notes: rawAppt.notes || '' });
+                                                     setIsEditingAppt(true);
+                                                     setShowApptModal(true);
+                                                  }}
                                                >
                                                   <div className="flex justify-between items-start mb-0.5"><span className="font-extrabold text-xs truncate leading-tight tracking-tight">{app.name}</span><MoreVertical className="w-3.5 h-3.5 opacity-20 hover:opacity-100 shrink-0" /></div>
                                                   <div className="font-semibold text-[10px] opacity-80 mb-1 truncate leading-tight">{app.type}</div>
@@ -569,6 +599,18 @@ const AdminDashboard = () => {
                                         <span className="truncate">{professionals.find(p => p.id === app.profId)?.name}</span>
                                      </div>
                                      <div className="shrink-0 text-lg ml-6 bg-slate-50 w-10 h-10 flex items-center justify-center rounded-full border border-slate-200 shadow-sm">{app.hasGlobe ? '🌐' : '🏠'}</div>
+                                     <div className="ml-6 space-y-1">
+                                        <button onClick={() => {
+                                            const rawAppt = appointments.find(a => a.id === app.id);
+                                            if(!rawAppt) return;
+                                            const d = new Date(rawAppt.date);
+                                            const formattedDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                                            setNewAppt({ id: rawAppt.id, clientId: rawAppt.clientId, specialistId: rawAppt.specialistId, serviceId: rawAppt.serviceId, date: formattedDate, sessionType: rawAppt.sessionType, status: rawAppt.status, notes: rawAppt.notes || '' });
+                                            setIsEditingAppt(true);
+                                            setShowApptModal(true);
+                                        }} className="block w-full text-[#00A89C] hover:text-emerald-700 font-bold text-xs bg-[#00A89C]/10 hover:bg-[#00A89C]/20 px-3 py-1.5 rounded-md text-center transition-colors">Editar</button>
+                                        <button onClick={() => handleDeleteAppt(app.id)} className="block w-full text-rose-500 hover:text-rose-700 font-bold text-xs bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-md text-center transition-colors">Borrar</button>
+                                     </div>
                                   </div>
                                ))}
                                {gridAppointments
@@ -1063,40 +1105,55 @@ const AdminDashboard = () => {
       {showApptModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex justify-center items-center animate-fade-in">
           <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <h3 className="text-xl font-bold text-slate-800 mb-4">Bloquear/Agendar Hora</h3>
-            <form onSubmit={handleCreateAppt} className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-800 mb-4">{isEditingAppt ? 'Detalles de Cita' : 'Bloquear/Agendar Hora'}</h3>
+            <form onSubmit={handleSaveAppt} className="space-y-4">
               <div><label className="text-xs font-bold text-slate-500 uppercase">Profesional A Cargo</label>
-                <select required className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" onChange={(e) => setNewAppt({...newAppt, specialistId: e.target.value})}>
+                <select required className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newAppt.specialistId} onChange={(e) => setNewAppt({...newAppt, specialistId: e.target.value})}>
                   <option value="">Seleccione...</option>
                   {professionals.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div><label className="text-xs font-bold text-slate-500 uppercase">Paciente</label>
-                <select required className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" onChange={(e) => setNewAppt({...newAppt, clientId: e.target.value})}>
+                <select required className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newAppt.clientId} onChange={(e) => setNewAppt({...newAppt, clientId: e.target.value})}>
                   <option value="">Buscar Paciente...</option>
                   {users.filter(u => u.role === 'CLIENT').map(c => <option key={c.id} value={c.id}>{c.profile.firstName} {c.profile.lastName}</option>)}
                 </select>
               </div>
+              
               <div className="grid grid-cols-2 gap-4">
                  <div><label className="text-xs font-bold text-slate-500 uppercase">Servicio</label>
-                   <select required className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" onChange={(e) => setNewAppt({...newAppt, serviceId: e.target.value})}>
+                   <select required className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newAppt.serviceId} onChange={(e) => setNewAppt({...newAppt, serviceId: e.target.value})}>
                      <option value="">Tipología...</option>
                      {services.map(srv => <option key={srv.id} value={srv.id}>{srv.name}</option>)}
                    </select>
                  </div>
                  <div><label className="text-xs font-bold text-slate-500 uppercase">Modalidad</label>
-                   <select className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" onChange={(e) => setNewAppt({...newAppt, sessionType: e.target.value})}>
+                   <select className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newAppt.sessionType} onChange={(e) => setNewAppt({...newAppt, sessionType: e.target.value})}>
                      <option value="IN_PERSON">Presencial</option>
                      <option value="ONLINE">Telemedicina</option>
                    </select>
                  </div>
               </div>
-              <div><label className="text-xs font-bold text-slate-500 uppercase">Fecha y Bloque</label>
-                <input required type="datetime-local" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" onChange={(e) => setNewAppt({...newAppt, date: e.target.value})} />
+              
+              {isEditingAppt && (
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="col-span-2 md:col-span-1"><label className="text-xs font-bold text-slate-500 uppercase">Estado Clínico</label>
+                   <select className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newAppt.status} onChange={(e) => setNewAppt({...newAppt, status: e.target.value})}>
+                     <option value="SCHEDULED">Agendada</option>
+                     <option value="COMPLETED">Asistió (Completada)</option>
+                     <option value="CANCELLED">Anulada</option>
+                     <option value="NO_SHOW">No Se Presentó</option>
+                   </select>
+                 </div>
+              </div>
+              )}
+
+              <div><label className="text-xs font-bold text-slate-500 uppercase">Fecha y Bloque Original</label>
+                <input required type="datetime-local" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 outline-none focus:border-[#00A89C]" value={newAppt.date} onChange={(e) => setNewAppt({...newAppt, date: e.target.value})} />
               </div>
               <div className="flex space-x-3 pt-4">
-                <button type="button" onClick={() => setShowApptModal(false)} className="flex-1 py-3 text-slate-500 font-bold bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Cerrar</button>
-                <button type="submit" className="flex-1 py-3 text-white font-bold bg-[#00A89C] rounded-xl hover:bg-emerald-500 shadow-lg shadow-[#00A89C]/30 transition-colors">Guardar Slot</button>
+                <button type="button" onClick={() => setShowApptModal(false)} className="flex-1 py-3 text-slate-500 font-bold bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button type="submit" className="flex-1 py-3 text-white font-bold bg-[#00A89C] rounded-xl hover:bg-emerald-500 shadow-lg shadow-[#00A89C]/30 transition-colors">{isEditingAppt ? 'Guardar Cambios' : 'Fijar Slot'}</button>
               </div>
             </form>
           </div>

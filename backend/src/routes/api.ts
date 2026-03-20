@@ -167,6 +167,48 @@ router.post('/appointments', express.json(), async (req, res) => {
   } catch(e) { console.error(e); res.status(500).json({error: 'Failed to create appt'}); }
 });
 
+// PUT to update appointment
+router.put('/appointments/:id', express.json(), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { clientId, specialistId, serviceId, date, sessionType, status, notes } = req.body;
+    
+    // Check if service price changed to update pending payments
+    const valService = serviceId ? await prisma.service.findUnique({ where: { id: serviceId } }) : null;
+    
+    const app = await prisma.appointment.update({
+      where: { id },
+      data: {
+        ...(clientId && { clientId }),
+        ...(specialistId && { specialistId }),
+        ...(serviceId && { serviceId }),
+        ...(date && { date: new Date(date) }),
+        ...(sessionType && { sessionType }),
+        ...(status && { status }),
+        ...(notes !== undefined && { notes })
+      },
+      include: { client: {include: {profile:true}}, specialist: {include: {profile:true}}, service: true, payment: true }
+    });
+    
+    // Auto-update pending payment amount if service changed
+    if (valService && app.payment?.status === 'PENDING') {
+      await prisma.payment.update({
+        where: { id: app.payment.id },
+        data: { amount: valService.price }
+      });
+    }
+
+    res.json(app);
+  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to update appt'}); }
+});
+
+// DELETE to remove appointment
+router.delete('/appointments/:id', async (req, res) => {
+  try {
+    await prisma.appointment.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to delete appt'}); }
+});
 // PUT to edit payment status
 router.put('/payments/:id', express.json(), async (req, res) => {
   try {
