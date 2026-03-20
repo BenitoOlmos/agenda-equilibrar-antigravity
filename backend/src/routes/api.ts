@@ -1,6 +1,9 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import multer from 'multer';
+import path from 'path';
+import { exec } from 'child_process';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -134,10 +137,13 @@ router.put('/services/:id', express.json(), async (req, res) => {
   } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to update service'}); }
 });
 
-// DELETE to remove service (Temporarily disabled due to clinical policy)
-// router.delete('/services/:id', ...
-
-// DELETE to remove user
+// DELETE to remove service 
+router.delete('/services/:id', async (req, res) => {
+  try {
+    await prisma.service.delete({ where: { id: req.params.id } });
+    res.json({ success: true });
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to delete service'}); }
+});
 router.delete('/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -226,6 +232,33 @@ router.delete('/programs/:id', async (req, res) => {
     await prisma.program.delete({ where: { id: req.params.id } });
     res.json({ success: true });
   } catch(e) { console.error(e); res.status(500).json({error: 'Failed to delete program'}); }
+});
+// ==================== DATABASE BACKUP ====================
+router.get('/backup/export', (req, res) => {
+  const dbPath = path.join(__dirname, '../../../prisma/dev.db');
+  res.download(dbPath, 'agenda_equilibrar_backup.db');
+});
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join(__dirname, '../../../prisma')),
+  filename: (req, file, cb) => cb(null, 'dev.db')
+});
+const upload = multer({ storage });
+
+router.post('/backup/import', upload.single('database'), async (req, res) => {
+  try {
+    // Overwriting dev.db is complete via multer. 
+    // Wait a brief moment, then disconnect prisma to force a reconnection on next query.
+    await prisma.$disconnect();
+    
+    // Optionally trigger PM2 restart if needed, though $disconnect might be enough.
+    // exec('pm2 restart equilibrar-api', (err) => { if(err) console.error(err) });
+    
+    res.json({ success: true, message: 'Database imported successfully. Server will reload.' });
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).json({ error: e.message || 'Failed to import backup' });
+  }
 });
 
 export default router;

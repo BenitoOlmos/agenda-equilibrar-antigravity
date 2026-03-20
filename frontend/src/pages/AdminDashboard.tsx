@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Users, Calendar as CalendarIcon, LogOut, DollarSign, 
   CheckCircle2, Mail, Database, Search, ChevronLeft, ChevronRight, 
@@ -178,8 +178,49 @@ const AdminDashboard = () => {
         return;
       }
       fetchDashboardData();
-    } catch (e) {
-      alert('Error de conexión fallida al servidor.');
+    } catch (error) {
+      alert('Error de conexión al intentar borrar el usuario.');
+    }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDeleteService = async (id: string) => {
+    if(!window.confirm('¿Seguro que deseas eliminar este servicio permanentemente?')) return;
+    try {
+      const res = await fetch(`/api/data/services/${id}`, { method: 'DELETE' });
+      if (!res.ok) { const errData = await res.json(); alert(`Error: ${errData.error}`); return; }
+      fetchDashboardData();
+    } catch (error) { alert('Error de conexión.'); }
+  };
+
+  const handleDeleteProgram = async (id: string) => {
+    if(!window.confirm('¿Seguro que deseas eliminar este paquete/programa permanentemente?')) return;
+    try {
+      const res = await fetch(`/api/data/programs/${id}`, { method: 'DELETE' });
+      if (!res.ok) { const errData = await res.json(); alert(`Error: ${errData.error}`); return; }
+      fetchDashboardData();
+    } catch (error) { alert('Error de conexión.'); }
+  };
+
+  const handleDatabaseExport = () => {
+    window.open('/api/data/backup/export', '_blank');
+  };
+
+  const handleDatabaseImport = async (e: any) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!window.confirm('¡ADVERTENCIA CRÍTICA! ⚠️\n\nCargar un archivo .db reemplazará TODO el sistema actual de la clínica de forma irreversible.\n\n¿Estás absolutamente seguro?')) return;
+    
+    const formData = new FormData();
+    formData.append('database', file);
+    try {
+      const res = await fetch('/api/data/backup/import', { method: 'POST', body: formData });
+      if (!res.ok) { const errData = await res.json(); alert(`Error: ${errData.error}`); return; }
+      alert('Base de datos cargada con éxito. El panel se recargará automáticamente.');
+      window.location.reload();
+    } catch(err) {
+      alert('Error de conexión al subir la base de datos.');
     }
   };
 
@@ -601,6 +642,7 @@ const AdminDashboard = () => {
                               <td className="p-5 font-extrabold text-[#00A89C]">${svc.price.toLocaleString()}</td>
                               <td className="p-5 text-right space-x-2">
                                  <button onClick={() => { setIsEditingService(true); setNewSvc(svc); setShowServiceModal(true); }} className="text-[#00A89C] hover:text-emerald-700 font-bold text-xs bg-[#00A89C]/10 px-3 py-1.5 rounded-md">Editar</button>
+                                 <button onClick={() => handleDeleteService(svc.id)} className="text-red-500 hover:text-red-600 font-bold text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md">Eliminar</button>
                               </td>
                            </tr>
                            ))}
@@ -648,6 +690,7 @@ const AdminDashboard = () => {
                                 <td className="p-5 font-extrabold text-indigo-600">${prog.price.toLocaleString()}</td>
                                 <td className="p-5 text-right space-x-2">
                                    <button onClick={() => { setIsEditingProgram(true); setNewProgram({...prog, services: prog.services.map((s:any) => s.serviceId)}); setShowProgramModal(true); }} className="text-indigo-600 hover:bg-indigo-50 font-bold text-xs bg-indigo-50/50 px-3 py-1.5 rounded-md">Editar</button>
+                                   <button onClick={() => handleDeleteProgram(prog.id)} className="text-red-500 hover:text-red-600 font-bold text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md">Eliminar</button>
                                 </td>
                              </tr>
                              ))}
@@ -810,10 +853,17 @@ const AdminDashboard = () => {
                         <Database className="w-5 h-5 text-indigo-400" />
                         <h3 className="font-mono font-bold text-sm tracking-wide">RAW_DATABASE_INSPECTOR</h3>
                       </div>
-                      <div className="flex space-x-1 bg-slate-900 p-1 rounded-lg">
-                        {['Users', 'Services', 'Appointments', 'Payments'].map(t => (
-                          <button key={t} onClick={() => setDbTab(t)} className={`px-4 py-1.5 text-xs font-mono font-bold rounded-md transition-colors ${dbTab === t ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-500 hover:text-slate-300'}`}>{t}</button>
-                        ))}
+                      <div className="flex items-center space-x-4">
+                        <div className="flex space-x-2">
+                          <input type="file" ref={fileInputRef} accept=".db" onChange={handleDatabaseImport} className="hidden" />
+                          <button onClick={() => fileInputRef.current?.click()} className="bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 px-3 py-1.5 rounded-md text-[11px] font-bold font-mono transition-colors shadow-sm">📤 RESTAURAR</button>
+                          <button onClick={handleDatabaseExport} className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/30 px-3 py-1.5 rounded-md text-[11px] font-bold font-mono transition-colors shadow-sm">📥 EXPORTAR</button>
+                        </div>
+                        <div className="flex space-x-1 bg-slate-900 p-1 rounded-lg">
+                          {['Users', 'Services', 'Appointments', 'Payments'].map(t => (
+                            <button key={t} onClick={() => setDbTab(t)} className={`px-4 py-1.5 text-xs font-mono font-bold rounded-md transition-colors ${dbTab === t ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-500 hover:text-slate-300'}`}>{t}</button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                     <div className="flex-1 overflow-auto p-2">
