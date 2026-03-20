@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Video, MapPin, LogOut, Monitor, Filter, ChevronDown, Clock, MoveUpRight, Plus, Users, LayoutDashboard } from 'lucide-react';
+import { Calendar, Video, MapPin, LogOut, MoveUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const LOGO_URL = 'https://www.clinicaequilibrar.cl/assets/logo-CYF-QZPl.png';
