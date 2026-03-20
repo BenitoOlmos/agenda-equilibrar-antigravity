@@ -99,12 +99,12 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const [statsRes, apptsRes, paymentsRes, usersRes, servicesRes, programsRes] = await Promise.all([
-        fetch('http://localhost:5000/api/data/stats').then(res => res.json()),
-        fetch('http://localhost:5000/api/data/appointments').then(res => res.json()),
-        fetch('http://localhost:5000/api/data/payments').then(res => res.json()),
-        fetch('http://localhost:5000/api/data/users').then(res => res.json()),
-        fetch('http://localhost:5000/api/data/services').then(res => res.json()),
-        fetch('http://localhost:5000/api/data/programs').then(res => res.json())
+        fetch('/api/data/stats').then(res => res.json()),
+        fetch('/api/data/appointments').then(res => res.json()),
+        fetch('/api/data/payments').then(res => res.json()),
+        fetch('/api/data/users').then(res => res.json()),
+        fetch('/api/data/services').then(res => res.json()),
+        fetch('/api/data/programs').then(res => res.json())
       ]);
       setStats(statsRes);
       setAppointments(apptsRes);
@@ -122,9 +122,9 @@ const AdminDashboard = () => {
   const handleSaveService = async (e: any) => {
     e.preventDefault();
     if (isEditingService) {
-      await fetch(`http://localhost:5000/api/data/services/${newSvc.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newSvc) });
+      await fetch(`/api/data/services/${newSvc.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newSvc) });
     } else {
-      await fetch('http://localhost:5000/api/data/services', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newSvc) });
+      await fetch('/api/data/services', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newSvc) });
     }
     setShowServiceModal(false);
     fetchDashboardData();
@@ -133,9 +133,9 @@ const AdminDashboard = () => {
   const handleSaveProgram = async (e: any) => {
     e.preventDefault();
     if (isEditingProgram) {
-      await fetch(`http://localhost:5000/api/data/programs/${newProgram.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProgram) });
+      await fetch(`/api/data/programs/${newProgram.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProgram) });
     } else {
-      await fetch('http://localhost:5000/api/data/programs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProgram) });
+      await fetch('/api/data/programs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newProgram) });
     }
     setShowProgramModal(false);
     fetchDashboardData();
@@ -143,7 +143,7 @@ const AdminDashboard = () => {
 
   const handleSaveUser = async (e: any) => {
     e.preventDefault();
-    const url = isEditingUser ? `http://localhost:5000/api/data/users/${newUser.id}` : 'http://localhost:5000/api/data/users';
+    const url = isEditingUser ? `/api/data/users/${newUser.id}` : '/api/data/users';
     const method = isEditingUser ? 'PUT' : 'POST';
     await fetch(url, { 
         method, headers: { 'Content-Type': 'application/json' }, 
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
 
   const handleCreateAppt = async (e: any) => {
     e.preventDefault();
-    await fetch('http://localhost:5000/api/data/appointments', { 
+    await fetch('/api/data/appointments', { 
         method: 'POST', headers: { 'Content-Type': 'application/json' }, 
         body: JSON.stringify({ ...newAppt, status: 'SCHEDULED' }) 
     });
@@ -885,7 +885,7 @@ const AdminDashboard = () => {
             <p className="text-xs text-slate-500 mb-6 font-mono text-ellipsis overflow-hidden">Tickt: {editingPayment.id}</p>
             <form onSubmit={async (e) => {
                 e.preventDefault();
-                await fetch(`http://localhost:5000/api/data/payments/${editingPayment.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: editingPayment.status, amount: editingPayment.amount, paymentMethod: editingPayment.paymentMethod }) });
+                await fetch(`/api/data/payments/${editingPayment.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: editingPayment.status, amount: editingPayment.amount, paymentMethod: editingPayment.paymentMethod }) });
                 setShowPaymentModal(false);
                 fetchDashboardData();
             }} className="space-y-4">

@@ -8,7 +8,7 @@ const CoordinatorDashboard = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/data/appointments')
+    fetch('/api/data/appointments')
       .then(res => res.json())
       .then(data => setAppointments(data));
   }, []);

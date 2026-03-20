@@ -8,7 +8,7 @@ const SpecialistDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/data/appointments')
+    fetch('/api/data/appointments')
       .then(res => res.json())
       .then(data => {
         // Mock filtering by a specialist (e.g. ID of Fernando or Maria Paz)
