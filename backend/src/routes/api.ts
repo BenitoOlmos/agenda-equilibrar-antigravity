@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -73,8 +74,7 @@ router.get('/services', async (req, res) => {
 router.post('/users', express.json(), async (req, res) => {
   try {
     const { email, password, role, firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance } = req.body;
-    const bcrypt = await import('bcrypt');
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password || '123456', 10);
     const user = await prisma.user.create({
       data: {
         email, role, passwordHash: hash,
@@ -85,7 +85,7 @@ router.post('/users', express.json(), async (req, res) => {
       include: { profile: true }
     });
     res.json(user);
-  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to create user'}); }
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to create user'}); }
 });
 
 // PUT to edit user (Profile update)
@@ -145,7 +145,7 @@ router.delete('/users/:id', async (req, res) => {
     const { id } = req.params;
     await prisma.user.delete({ where: { id } });
     res.json({ success: true });
-  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to delete user'}); }
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to delete user'}); }
 });
 // POST to create appointment
 router.post('/appointments', express.json(), async (req, res) => {
