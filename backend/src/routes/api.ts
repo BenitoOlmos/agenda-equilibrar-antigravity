@@ -98,13 +98,16 @@ router.put('/users/:id', express.json(), async (req, res) => {
       data: {
         email, role,
         profile: {
-          update: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance }
+          upsert: {
+            create: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance },
+            update: { firstName, lastName, phone, documentId, address, city, specialty, color, healthSystem, complementaryInsurance }
+          }
         }
       },
       include: { profile: true }
     });
     res.json(user);
-  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to update user'}); }
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to update user'}); }
 });
 
 // POST to create service
@@ -128,7 +131,7 @@ router.put('/services/:id', express.json(), async (req, res) => {
       data: { name, description, duration: Number(duration), price: Number(price) }
     });
     res.json(srv);
-  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to update service'}); }
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to update service'}); }
 });
 
 // DELETE to remove service
@@ -136,7 +139,7 @@ router.delete('/services/:id', async (req, res) => {
   try {
     await prisma.service.delete({ where: { id: req.params.id } });
     res.json({ success: true });
-  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to delete service'}); }
+  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to delete service'}); }
 });
 
 // DELETE to remove user
