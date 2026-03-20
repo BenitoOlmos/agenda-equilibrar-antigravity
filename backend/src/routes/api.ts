@@ -88,7 +88,13 @@ router.post('/users', express.json(), async (req, res) => {
       include: { profile: true }
     });
     res.json(user);
-  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to create user'}); }
+  } catch(e: any) { 
+    console.error(e); 
+    if (e.code === 'P2002') {
+      return res.status(400).json({ error: 'El correo electrónico ingresado ya se encuentra registrado por otro usuario.' });
+    }
+    res.status(500).json({error: e.message || 'Failed to create user'}); 
+  }
 });
 
 // PUT to edit user (Profile update)
@@ -110,7 +116,13 @@ router.put('/users/:id', express.json(), async (req, res) => {
       include: { profile: true }
     });
     res.json(user);
-  } catch(e: any) { console.error(e); res.status(500).json({error: e.message || 'Failed to update user'}); }
+  } catch(e: any) { 
+    console.error(e); 
+    if (e.code === 'P2002') {
+      return res.status(400).json({ error: 'El correo electrónico ingresado ya se encuentra registrado por otro usuario.' });
+    }
+    res.status(500).json({error: e.message || 'Failed to update user'}); 
+  }
 });
 
 // POST to create service
