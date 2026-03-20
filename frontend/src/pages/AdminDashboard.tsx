@@ -230,12 +230,19 @@ const AdminDashboard = () => {
     if (isEditingAppt) {
       await fetch(`/api/data/appointments/${newAppt.id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAppt)
+        body: JSON.stringify({
+          ...newAppt,
+          date: newAppt.date ? new Date(newAppt.date).toISOString() : undefined
+        })
       });
     } else {
       await fetch('/api/data/appointments', { 
           method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ ...newAppt, status: 'SCHEDULED' }) 
+          body: JSON.stringify({ 
+            ...newAppt, 
+            status: 'SCHEDULED',
+            date: newAppt.date ? new Date(newAppt.date).toISOString() : undefined
+          }) 
       });
     }
     setShowApptModal(false);
