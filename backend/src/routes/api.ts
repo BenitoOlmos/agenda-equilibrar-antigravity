@@ -138,6 +138,15 @@ router.delete('/services/:id', async (req, res) => {
     res.json({ success: true });
   } catch(e) { console.error(e); res.status(500).json({error: 'Failed to delete service'}); }
 });
+
+// DELETE to remove user
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.user.delete({ where: { id } });
+    res.json({ success: true });
+  } catch(e) { console.error(e); res.status(500).json({error: 'Failed to delete user'}); }
+});
 // POST to create appointment
 router.post('/appointments', express.json(), async (req, res) => {
   try {

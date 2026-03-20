@@ -153,6 +153,12 @@ const AdminDashboard = () => {
     fetchDashboardData();
   };
 
+  const handleDeleteUser = async (id: string) => {
+    if(!window.confirm('¿Seguro que deseas eliminar a este usuario permanentemente?')) return;
+    await fetch(`/api/data/users/${id}`, { method: 'DELETE' });
+    fetchDashboardData();
+  };
+
   const handleCreateAppt = async (e: any) => {
     e.preventDefault();
     await fetch('/api/data/appointments', { 
@@ -686,8 +692,8 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td className="p-5 text-right space-x-2">
-                              <button onClick={() => { setIsEditingUser(true); setNewUser({id: user.id, email: user.email, role: user.role, firstName: user.profile?.firstName||'', lastName: user.profile?.lastName||'', rut: user.profile?.documentId||'', phone: user.profile?.phone||'', address: user.profile?.address||'', color: user.profile?.color || PRESET_COLORS[0]}); setShowUserModal(true); }} className="text-[#00A89C] hover:bg-[#00A89C]/20 font-bold text-xs bg-[#00A89C]/10 px-3 py-1.5 rounded-md transition-colors">Editar</button>
-                              <button className="text-red-500 hover:bg-red-100 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-md transition-colors">Borrar</button>
+                              <button onClick={() => { setIsEditingUser(true); setNewUser({id: user.id, email: user.email, role: user.role, firstName: user.profile?.firstName||'', lastName: user.profile?.lastName||'', rut: user.profile?.documentId||'', phone: user.profile?.phone||'', address: user.profile?.address||'', color: user.profile?.color || '#00A89C', healthSystem: user.profile?.healthSystem || '', complementaryInsurance: user.profile?.complementaryInsurance || ''}); setShowUserModal(true); }} className="text-[#00A89C] hover:bg-[#00A89C]/20 font-bold text-xs bg-[#00A89C]/10 px-3 py-1.5 rounded-md transition-colors">Editar</button>
+                              <button onClick={() => handleDeleteUser(user.id)} className="text-red-500 hover:bg-red-100 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-md transition-colors">Borrar</button>
                             </td>
                           </tr>
                         ))}
