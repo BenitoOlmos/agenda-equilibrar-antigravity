@@ -10,12 +10,12 @@ const LOGO_URL = 'https://www.clinicaequilibrar.cl/assets/logo-CYF-QZPl.png';
 
 const hours = Array.from({ length: 13 }, (_, i) => i + 8); // 08:00 to 20:00
 
-const CalendarWidget = ({ month, year, selectedDay, onDaySelect }: any) => (
+const CalendarWidget = ({ month, year, selectedDay, onDaySelect, onPrevMonth, onNextMonth }: any) => (
   <div className="space-y-2 py-3">
     <div className="flex items-center justify-between text-[11px] px-1 mb-1">
-      <button className="p-1 hover:bg-slate-100 rounded text-slate-300"><ChevronLeft className="w-3 h-3" /></button>
+      <button onClick={onPrevMonth} className="p-1 hover:bg-slate-100 rounded text-slate-300"><ChevronLeft className="w-3 h-3" /></button>
       <span className="font-bold text-slate-600 tracking-tight">{month} - {year}</span>
-      <button className="p-1 hover:bg-slate-100 rounded text-slate-300"><ChevronRight className="w-3 h-3" /></button>
+      <button onClick={onNextMonth} className="p-1 hover:bg-slate-100 rounded text-slate-300"><ChevronRight className="w-3 h-3" /></button>
     </div>
     <div className="grid grid-cols-7 gap-1 text-[9px] text-center font-medium text-slate-400 mb-1">
       {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].map(d => <span key={d}>{d}</span>)}
@@ -46,7 +46,7 @@ const SpecialistDashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const agendaFilterSpec = currentUser.id || 'ALL';
+  const agendaFilterSpec = currentUser?.id || currentUser?.userId || 'GUEST_LOCK';
 
   const [appointments, setAppointments] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -262,6 +262,16 @@ const SpecialistDashboard = () => {
                    newD.setDate(d);
                    setSelectedDate(newD);
                  }}
+                 onPrevMonth={() => {
+                   const newD = new Date(selectedDate);
+                   newD.setMonth(newD.getMonth() - 1);
+                   setSelectedDate(newD);
+                 }}
+                 onNextMonth={() => {
+                   const newD = new Date(selectedDate);
+                   newD.setMonth(newD.getMonth() + 1);
+                   setSelectedDate(newD);
+                 }}
               />
             </div>
           )}
@@ -280,16 +290,16 @@ const SpecialistDashboard = () => {
            {activeTab === 'agenda' && (
               <div className="flex flex-col h-full animate-fade-in max-w-[1400px] mx-auto">
                  {/* Agenda Toolbar */}
-                 <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
-                   <div className="flex items-center space-x-4 min-w-max">
-                     <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                       <button onClick={() => setViewMode('day')} className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'day' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Diario</button>
-                       <button onClick={() => setViewMode('week')} className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'week' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Semanal</button>
-                       <button onClick={() => setViewMode('month')} className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'month' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Mensual</button>
-                       <button onClick={() => setViewMode('list')} className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Lista</button>
+                 <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                   <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                     <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl border border-slate-200 w-full sm:w-auto">
+                       <button onClick={() => setViewMode('day')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all ${viewMode === 'day' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Diario</button>
+                       <button onClick={() => setViewMode('week')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all ${viewMode === 'week' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Semanal</button>
+                       <button onClick={() => setViewMode('month')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all ${viewMode === 'month' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Mensual</button>
+                       <button onClick={() => setViewMode('list')} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}>Lista</button>
                      </div>
                      <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
-                     <span className="text-xl font-black text-slate-700 tracking-tight capitalize group flex items-center cursor-pointer">
+                     <span className="text-sm md:text-xl font-black text-slate-700 tracking-tight capitalize group flex items-center cursor-pointer truncate">
                         {viewMode === 'week' 
                           ? `${weekDays[0].getDate()} ${weekDays[0].toLocaleString('es-ES', {month: 'short'})} - ${weekDays[6].getDate()} ${weekDays[6].toLocaleString('es-ES', {month: 'short'})} ${selectedDate.getFullYear()}`
                           : viewMode === 'month'
@@ -298,32 +308,35 @@ const SpecialistDashboard = () => {
                      </span>
                    </div>
                    
-                   <div className="flex items-center w-full xl:w-auto space-x-3 min-w-max">
-                     <button onClick={() => {
-                        const newD = new Date(selectedDate);
-                        if(viewMode==='week') newD.setDate(newD.getDate() - 7);
-                        else if(viewMode==='month') newD.setMonth(newD.getMonth() - 1);
-                        else newD.setDate(newD.getDate() - 1);
-                        setSelectedDate(newD);
-                     }} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-500 shadow-sm transition-colors"><ChevronLeft className="w-5 h-5" /></button>
-                     <button onClick={() => {
-                        setSelectedDate(new Date());
-                     }} className="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 font-bold text-sm shadow-sm transition-colors">Hoy</button>
-                     <button onClick={() => {
-                        const newD = new Date(selectedDate);
-                        if(viewMode==='week') newD.setDate(newD.getDate() + 7);
-                        else if(viewMode==='month') newD.setMonth(newD.getMonth() + 1);
-                        else newD.setDate(newD.getDate() + 1);
-                        setSelectedDate(newD);
-                     }} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-500 shadow-sm transition-colors"><ChevronRight className="w-5 h-5" /></button>
+                   <div className="flex flex-wrap items-center w-full xl:w-auto gap-3">
+                     <div className="flex space-x-2">
+                       <button onClick={() => {
+                          const newD = new Date(selectedDate);
+                          if(viewMode==='week') newD.setDate(newD.getDate() - 7);
+                          else if(viewMode==='month') newD.setMonth(newD.getMonth() - 1);
+                          else newD.setDate(newD.getDate() - 1);
+                          setSelectedDate(newD);
+                       }} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-500 shadow-sm transition-colors"><ChevronLeft className="w-5 h-5" /></button>
+                       <button onClick={() => {
+                          setSelectedDate(new Date());
+                       }} className="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 font-bold text-sm shadow-sm transition-colors">Hoy</button>
+                       <button onClick={() => {
+                          const newD = new Date(selectedDate);
+                          if(viewMode==='week') newD.setDate(newD.getDate() + 7);
+                          else if(viewMode==='month') newD.setMonth(newD.getMonth() + 1);
+                          else newD.setDate(newD.getDate() + 1);
+                          setSelectedDate(newD);
+                       }} className="p-2 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-500 shadow-sm transition-colors"><ChevronRight className="w-5 h-5" /></button>
+                     </div>
                      
-                     <div className="w-px h-8 bg-slate-200 mx-2"></div>
-                     <button onClick={() => { setIsEditingAppt(false); setIsBlockMode(false); setNewAppt({ clientId: '', specialistId: currentUser.id || '', serviceId: '', date: selectedDate.toISOString().slice(0,16), sessionType: 'IN_PERSON', status: 'SCHEDULED' }); setShowApptModal(true); }} className="bg-[#00A89C] hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all shadow-[#00A89C]/20 shrink-0">
-                        + Agendar Reservación
-                     </button>
-                     <button onClick={() => { setIsEditingAppt(false); setIsBlockMode(true); setNewAppt({ clientId: '', specialistId: currentUser.id || '', serviceId: '', date: selectedDate.toISOString().slice(0,16), sessionType: 'IN_PERSON', status: 'SCHEDULED' }); setShowApptModal(true); }} className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all shadow-orange-500/20 shrink-0 flex items-center">
-                        BLOQUEO DE AGENDA
-                     </button>
+                     <div className="w-full flex flex-col sm:flex-row gap-2">
+                       <button onClick={() => { setIsEditingAppt(false); setIsBlockMode(false); setNewAppt({ clientId: '', specialistId: currentUser.id || currentUser.userId || '', serviceId: '', date: selectedDate.toISOString().slice(0,16), sessionType: 'IN_PERSON', status: 'SCHEDULED' }); setShowApptModal(true); }} className="bg-[#00A89C] hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-md transition-all shadow-[#00A89C]/20 w-full sm:w-auto">
+                          + Agendar Reservación
+                       </button>
+                       <button onClick={() => { setIsEditingAppt(false); setIsBlockMode(true); setNewAppt({ clientId: '', specialistId: currentUser.id || currentUser.userId || '', serviceId: '', date: selectedDate.toISOString().slice(0,16), sessionType: 'IN_PERSON', status: 'SCHEDULED' }); setShowApptModal(true); }} className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-md transition-all shadow-orange-500/20 flex justify-center items-center w-full sm:w-auto">
+                          BLOQUEO AGENDA
+                       </button>
+                     </div>
                    </div>
                  </div>
 
